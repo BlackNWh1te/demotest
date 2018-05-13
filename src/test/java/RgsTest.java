@@ -1,77 +1,84 @@
+import Pages.RGS_Page;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.PageFactory;
 
 
-public class RgsTest {
+public class RgsTest implements iHandies {
+
+    WebDriver driver;
 
 
+    @Before
+    public void setUp() {
 
+        driver = setDriver("chrome", 10);
+
+    }
 
 
     @Test
-    public void rgsTest() throws InterruptedException, NoSuchElementException {
-        String url = "https://www.rgs.ru/";
+    public void rgsTest()  {
 
-        Tools.driver.get(url);
-        Thread.sleep(2000);
-        Tools.elementLocator("//a[@href = '#' and @data-toggle = 'dropdown']")[0].click();
-        Thread.sleep(2000);
-        Tools.elementLocator("//a[contains(text(),'ДМС')]")[0].click();
-        Thread.sleep(2000);
+        driver.get(RGS_Page.URL);
 
-        if (!Tools.containsElement("//h1[contains(text(), 'добровольное медицинское страхование')]")) {
-            System.out.println("No header found");
-            Tools.driver.close();
-            return;
-
-        }
-        Thread.sleep(2000);
-        Tools.elementLocator(
-                "//a[@data-form='insuranceApplication' and contains(@class, 'hidden')]")[0].click();
-        Thread.sleep(2000);
-
-        if ((!Tools.pageContainsText
-                ("Заявка на добровольное медицинское страхование",
-                        "//b[@data-bind='text: options.title']"))) {
-            System.out.println("Page - text match not found");
-            Tools.driver.close();
-            return;
-        }
-        Tools.keySender(Tools.elementLocator(
-                "//input[contains(@name, 'LastName')]",
-                "//input[contains(@name,'FirstName')]",
-                "//input[contains(@name,'MiddleName')]",
-                "//input[contains(@data-bind, 'Phone')]",
-                "//input[contains(@name, 'Email')]",
-                "//textarea[@name = 'Comment']"),
-                "Петров", "Сергей", "Павлович", "9153842322", "qwertyqwerty", "мой коментарий");
-        Tools.scrollSelect("//select[@name = 'Region']");
-        Thread.sleep(1000);
-        Tools.elementLocator("//input[contains(@*,'checkbox')]")[0].click();
+        RGS_Page rgsPage = PageFactory.initElements(driver, RGS_Page.class);
 
 
-        /**некорректно работает с номером телефона.
-         т.к. для отображении  на веб странице используется маска.
-         не смог понять, как обойти
-         */
-        Tools.keyVerificator(Tools.sentKeys);
-        Tools.elementLocator("//button[contains(text(),'Отправить' )]")[0].click();
-        if (Tools.elementLocator("//span[contains(text(),'Введите адрес электронной почты')]")[0] == null){
+        rgsPage.insuranceLink.click();
+        rgsPage.dmsLink.click();
 
-            return;
-        }
+        rgsPage.dmsHeader1.isDisplayed();
+        rgsPage.insuranceApplication.click();
+
+        rgsPage.applicationHeader.isDisplayed();
+
+        rgsPage.appFirstName.sendKeys(Person.getName());
+        rgsPage.appLastName.sendKeys(Person.getLastName());
+        rgsPage.appMiddleName.sendKeys(Person.getMiddleName());
+        rgsPage.appPhone.sendKeys(Person.getPhone());
+        rgsPage.appEMail.sendKeys("qwertyqwerty");
+        rgsPage.appComment.sendKeys("Комментарий");
+        rgsPage.appRegion.get(randomizer(rgsPage.appRegion.size())).click();
+        rgsPage.appCheckbox.click();
 
 
+        Assert.assertEquals(Person.getName(), rgsPage.appFirstName.getAttribute("value"));
+        Assert.assertEquals(Person.getLastName(), rgsPage.appLastName.getAttribute("value"));
+        Assert.assertEquals(Person.getMiddleName(), rgsPage.appMiddleName.getAttribute("value"));
+        Assert.assertEquals("qwertyqwerty", rgsPage.appEMail.getAttribute("value"));
+        rgsPage.appCheckbox.isEnabled();
 
 
+        rgsPage.sendApp.click();
 
+        rgsPage.emailInputError.isDisplayed();
+
+
+    }
+
+    @After
+    public void tearDown() {
+
+        driver.quit();
 
     }
 
 
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

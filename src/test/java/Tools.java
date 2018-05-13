@@ -1,8 +1,11 @@
+import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.support.ui.Select;
 
 import java.util.HashMap;
@@ -11,6 +14,52 @@ import java.util.Map;
 import java.util.Random;
 
 public class Tools {
+    public static WebDriver drive;
+
+    @Test
+    public void testical() {
+
+        WebDriver driver = Tools.setDriver("chrome", "https://www.kinopoisk.ru/");
+        driver.quit();
+
+
+    }
+
+
+    public static WebDriver setDriver(String browser, String url) {
+
+        WebDriver driver;
+
+        switch (browser.toLowerCase()) {
+
+
+            case "firefox": {
+                driver = new FirefoxDriver();
+                driver.get(url);
+                return driver;
+            }
+
+            case "ie": {
+                driver = new InternetExplorerDriver();
+                driver.get(url);
+                return driver;
+            }
+
+            default: {
+                driver = new ChromeDriver();
+                driver.get(url);
+                return driver;
+            }
+
+        }
+
+
+    }
+
+
+    public void fieldFiller(String fieldName, String value) {
+
+    }
 
 
     public static WebDriver driver = new ChromeDriver();
@@ -33,12 +82,14 @@ public class Tools {
 
     }
 
-    public static boolean scrollSelect(String xpath) {
+    public static boolean scrollSelect(List<WebElement> options) {
 
-        try {
-            WebElement element = driver.findElement(By.xpath(xpath));
-            Select select = new Select(element);
-            List<WebElement> options = select.getOptions();
+        if (options.isEmpty()) {
+            System.out.println("The list is empty");
+            throw new RuntimeException();
+        }
+
+        {
 
             Random rand = new Random();
 
@@ -46,9 +97,6 @@ public class Tools {
             return true;
 
 
-        } catch (NoSuchElementException e) {
-            System.out.println("No elements found following \"" + xpath + "\"");
-            return false;
         }
 
     }
